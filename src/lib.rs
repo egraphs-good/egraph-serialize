@@ -60,9 +60,9 @@ pub struct EGraph {
     pub nodes: IndexMap<NodeId, Node>,
     #[cfg_attr(feature = "serde", serde(default))]
     pub root_eclasses: Vec<ClassId>,
-    // Optional mapping of e-class ids to the type/sort of the expressions in the e-class
+    // Optional mapping of e-class ids to some additional data about the e-class
     #[cfg_attr(feature = "serde", serde(default))]
-    pub classes: IndexMap<ClassId, String>,
+    pub class_data: IndexMap<ClassId, ClassData>,
     #[cfg_attr(feature = "serde", serde(skip))]
     once_cell_classes: OnceCell<IndexMap<ClassId, Class>>,
 }
@@ -107,7 +107,6 @@ impl EGraph {
                     .or_insert_with(|| Class {
                         id: node.eclass.clone(),
                         nodes: vec![],
-                        tp: self.classes.get(&node.eclass).cloned(),
                     })
                     .nodes
                     .push(node_id.clone())
@@ -182,6 +181,12 @@ fn one() -> Cost {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Class {
     pub id: ClassId,
-    pub tp: Option<String>,
     pub nodes: Vec<NodeId>,
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct ClassData {
+    #[cfg_attr(feature = "serde", serde(rename = "type"))]
+    pub typ: Option<String>,
 }
