@@ -3,7 +3,7 @@ use egraph_serialize::*;
 #[test]
 fn test_round_trip() {
     let mut n_tested = 0;
-    let pattern = "../extraction-gym/data/**/*.json";
+    let pattern = "tests/*.json";
     for entry in glob::glob(pattern).expect("Failed to read glob pattern") {
         let entry = entry.unwrap();
         println!("Testing {:?}", entry);
