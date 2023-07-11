@@ -60,6 +60,9 @@ pub struct EGraph {
     pub nodes: IndexMap<NodeId, Node>,
     #[cfg_attr(feature = "serde", serde(default))]
     pub root_eclasses: Vec<ClassId>,
+    // Optional mapping of e-class ids to some additional data about the e-class
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub class_data: IndexMap<ClassId, ClassData>,
     #[cfg_attr(feature = "serde", serde(skip))]
     once_cell_classes: OnceCell<IndexMap<ClassId, Class>>,
 }
@@ -179,4 +182,11 @@ fn one() -> Cost {
 pub struct Class {
     pub id: ClassId,
     pub nodes: Vec<NodeId>,
+}
+
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[derive(Debug, Clone, PartialEq)]
+pub struct ClassData {
+    #[cfg_attr(feature = "serde", serde(rename = "type"))]
+    pub typ: Option<String>,
 }
