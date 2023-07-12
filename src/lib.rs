@@ -162,7 +162,7 @@ impl std::ops::Index<&ClassId> for EGraph {
 pub struct Node {
     pub op: String,
     #[cfg_attr(feature = "serde", serde(default))]
-    pub children: Vec<NodeId>,
+    pub children: Vec<ClassId>,
     pub eclass: ClassId,
     #[cfg_attr(feature = "serde", serde(default = "one"))]
     pub cost: Cost,
