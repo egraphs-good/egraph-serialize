@@ -23,7 +23,7 @@ where
                     children: node
                         .children()
                         .iter()
-                        .map(|id| NodeId::from(format!("{}.0", id)))
+                        .map(|id| ClassId::from(format!("{}", id)))
                         .collect(),
                     eclass: ClassId::from(format!("{}", class.id)),
                     cost: Cost::new(1.0).unwrap(),
