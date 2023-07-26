@@ -27,7 +27,7 @@ fn test_graphviz() {
     let mut names = Vec::new();
     for entry in test_files() {
         println!("Testing graphviz {:?}", entry);
-        let egraph = EGraph::from_json_file(entry.as_path()).unwrap();
+        let mut egraph = EGraph::from_json_file(entry.as_path()).unwrap();
         names.push(entry.file_stem().unwrap().to_str().unwrap().to_string());
 
         // If graphviz isn't installed, just test that we can create the dot string, not generate the SVG
@@ -37,6 +37,20 @@ fn test_graphviz() {
             let path = Path::new("./tests-viz")
                 .join(entry.file_name().unwrap())
                 .with_extension("svg");
+            println!("Writing to {:?}", path);
+            egraph.to_svg_file(path).unwrap();
+        }
+        // Generate graphs with inlined leaves as well
+        egraph.inline_leaves();
+
+        if no_dot {
+            egraph.to_dot();
+        } else {
+            let path = Path::new("./tests-viz").join(format!(
+                "{}-inlined.svg",
+                entry.file_stem().unwrap().to_str().unwrap()
+            ));
+            println!("Writing to {:?}", path);
             egraph.to_svg_file(path).unwrap();
         }
     }
@@ -47,15 +61,15 @@ fn test_graphviz() {
 
 This is a list of all the tests in the `tests` directory. Each test is a JSON file that is loaded into an EGraph and then rendered as an SVG.
 
-| Test | Image |
-| ---- | ----- |
+| Test | Image | Inlined Leaves Image |
+| ---- | ----- | -------------------- |
 {}"#,
         names
             .iter()
             .map(|name| {
                 format!(
-                    "| [`{}`](../tests/{}.json) | ![svg file](./{}.svg) |",
-                    name, name, name
+                    "| [`{}`](../tests/{}.json) | ![svg file](./{}.svg) | ![inlined leaves svg file](./{}-inlined.svg) |",
+                    name, name, name, name
                 )
             })
             .collect::<Vec<_>>()
