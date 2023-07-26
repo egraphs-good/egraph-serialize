@@ -1,4 +1,5 @@
-<!-- Auto generate from tests --> # EGraph Visualization Tests
+<!-- Auto generate from tests -->
+# EGraph Visualization Tests
 
 This is a list of all the tests in the `tests` directory. Each test is a JSON file that is loaded into an EGraph and then rendered as an SVG.
 
