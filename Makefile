@@ -1,9 +1,9 @@
 .PHONY: all test nits
 
-all: test nits 
+all: test nits
 
 test:
-	cargo test
+	cargo test --all-features
 
 nits:
 	@rustup component add clippy

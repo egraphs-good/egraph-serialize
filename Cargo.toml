@@ -8,6 +8,7 @@ version = "0.1.0"
 [features]
 default = ["serde"]
 serde = ["dep:serde", "dep:serde_json", "indexmap/serde", "ordered-float/serde"]
+graphviz = ["dep:graphviz-rust"]
 
 [dependencies]
 indexmap = "2.0.0"
@@ -24,6 +25,10 @@ version = "1.0.166"
 features = ["preserve_order"]
 optional = true
 version = "1.0.100"
+
+[dependencies.graphviz-rust]
+optional = true
+version = "0.6.2"
 
 [dev-dependencies]
 glob = "0.3.1"

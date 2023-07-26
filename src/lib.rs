@@ -1,3 +1,6 @@
+#[cfg(feature = "graphviz")]
+mod graphviz;
+
 use std::sync::Arc;
 
 use indexmap::{map::Entry, IndexMap};

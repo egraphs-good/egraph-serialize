@@ -2,7 +2,7 @@
 
 mostly for use in [extraction gym](https://github.com/egraphs-good/extraction-gym) rn
 
-# snippet for egg
+## snippet for egg
 
 One day egg will natively export to this format, but for now you can use this:
 
@@ -36,3 +36,11 @@ where
 ```
 
 Don't forget to add something to `root_eclasses` on the resulting serialized egraph!
+
+
+## Visualization
+
+Check out the [`./tests-viz`](./tests-viz) directory to view visualizations of all the test cases with Graphviz.
+
+
+To remake them, run `make tests-viz` from the root of this repo. You'll need to have [Graphviz](https://graphviz.org/) installed.

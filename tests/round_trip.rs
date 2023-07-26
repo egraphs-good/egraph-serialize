@@ -9,6 +9,7 @@ fn test_round_trip() {
         println!("Testing {:?}", entry);
         let egraph = EGraph::from_json_file(entry.as_path()).unwrap();
         egraph.test_round_trip();
+        egraph.to_dot();
         n_tested += 1;
     }
     assert!(n_tested > 0);
