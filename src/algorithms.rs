@@ -23,9 +23,7 @@ impl EGraph {
         let mut leaves = Vec::new();
         let mut leave_to_op = std::collections::HashMap::new();
         for (eclass, nodes) in eclass_to_nodes {
-            if nodes.len() == 1
-                && nodes[0].1.children.is_empty()
-            {
+            if nodes.len() == 1 && nodes[0].1.children.is_empty() {
                 leaves.push((eclass, nodes[0].0.clone()));
                 leave_to_op.insert(nodes[0].0.clone(), nodes[0].1.op.clone());
             }
@@ -48,7 +46,10 @@ impl EGraph {
         }
         // 4. Inline leaf nodes into their parents
         for (parent, leaf_children) in &parents_to_children {
-            let additional_cost = leaf_children.iter().map(|child| self.nodes.get(child).unwrap().cost).sum::<ordered_float::NotNan<f64>>();
+            let additional_cost = leaf_children
+                .iter()
+                .map(|child| self.nodes.get(child).unwrap().cost)
+                .sum::<ordered_float::NotNan<f64>>();
             let parent_node = self.nodes.get_mut(parent).unwrap();
             let args = parent_node
                 .children
