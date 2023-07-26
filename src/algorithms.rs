@@ -25,16 +25,16 @@ impl EGraph {
         for (eclass, nodes) in eclass_to_nodes {
             if nodes.len() == 1
                 && nodes[0].1.children.is_empty()
-                && !self.root_eclasses.contains(&eclass)
             {
                 leaves.push((eclass, nodes[0].0.clone()));
                 leave_to_op.insert(nodes[0].0.clone(), nodes[0].1.op.clone());
             }
         }
-        // 3. Remove leaf nodes from egraph and class data
+        // 3. Remove leaf nodes from egraph, class data, and root eclasses
         for (eclass, node_id) in &leaves {
             self.nodes.remove(node_id);
             self.class_data.remove(eclass);
+            self.root_eclasses.retain(|root| root != eclass);
         }
         // 4. Create mapping from all parents which are updated to the children which are inlined
         let mut parents_to_children = std::collections::HashMap::new();
