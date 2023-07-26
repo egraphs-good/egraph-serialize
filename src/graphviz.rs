@@ -115,7 +115,7 @@ impl EGraph {
             let outer_subgraph_id = quote(&format!("outer_{}", subgraph_id));
             let quoted_subgraph_id = quote(&subgraph_id);
 
-            let stmt = stmt!(subgraph!(outer_subgraph_id;
+            let subgraph = subgraph!(outer_subgraph_id;
                 // Disable label for now, to reduce size
                 // NodeAttributes::label(subgraph_html_label(&typ)),
 
@@ -127,8 +127,12 @@ impl EGraph {
                 // https://forum.graphviz.org/t/how-to-add-space-between-clusters/1209/3
                 SubgraphAttributes::style(quote("invis")),
                 attr!("cluster", "true")
-            ));
-            stmts.push(stmt);
+            );
+            // If this is a root e-class, make the border bold
+            if self.root_eclasses.contains(&class_id) {
+                stmts.push(stmt!(attr!("penwidth", 2)));
+            }
+            stmts.push(stmt!(subgraph));
         }
         // Set margin to 0 at the end again, so that total graph margin is 0, but all the clusters
         // defined above have some margins
