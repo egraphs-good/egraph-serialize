@@ -22,9 +22,8 @@ fn test_graphviz() {
     for entry in test_files() {
         println!("Testing graphviz {:?}", entry);
         let egraph = EGraph::from_json_file(entry.as_path()).unwrap();
-        let name = entry.file_stem().unwrap();
-        names.push(name.to_str().unwrap().to_string());
-        let path = Path::new("./tests-viz").join(name).with_extension("svg");
+        names.push(entry.file_stem().unwrap().to_str().unwrap().to_string());
+        let path = Path::new("./tests-viz").join(entry.file_name().unwrap()).with_extension("svg");
         egraph.to_svg_file(path).unwrap();
     }
 
@@ -47,7 +46,7 @@ This is a list of all the tests in the `tests` directory. Each test is a JSON fi
             .collect::<Vec<_>>()
             .join("\n")
     );
-    std::fs::write("./tests-viz/INDEX.md", markdown).unwrap();
+    std::fs::write("./tests-viz/README.md", markdown).unwrap();
 }
 
 fn test_files() -> Vec<PathBuf> {

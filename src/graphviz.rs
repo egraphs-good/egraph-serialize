@@ -105,7 +105,8 @@ impl EGraph {
                         edge!(source => target; EdgeAttributes::lhead(quote(&child_subgraph_id)));
                     inner_stmts.push(stmt!(edge));
                 }
-                node!(quoted_node_id;NodeAttributes::label(html_label), NodeAttributes::tooltip(quoted_tooltip));
+                let node = node!(quoted_node_id;NodeAttributes::label(html_label), NodeAttributes::tooltip(quoted_tooltip));
+                inner_stmts.push(stmt!(node));
             }
 
             let subgraph_id = format!("cluster_{}", class_id);
