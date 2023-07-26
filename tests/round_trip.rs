@@ -14,20 +14,41 @@ fn test_round_trip() {
     assert!(n_tested > 0);
 }
 
-
 #[cfg(feature = "graphviz")]
 #[test]
 fn test_graphviz() {
     use std::path::Path;
-
+    let mut names = Vec::new();
     for entry in test_files() {
         println!("Testing graphviz {:?}", entry);
         let egraph = EGraph::from_json_file(entry.as_path()).unwrap();
-        let path = Path::new("./tests-viz").join(entry.file_stem().unwrap()).with_extension("svg");
+        let name = entry.file_stem().unwrap();
+        names.push(name.to_str().unwrap().to_string());
+        let path = Path::new("./tests-viz").join(name).with_extension("svg");
         egraph.to_svg_file(path).unwrap();
     }
-}
 
+    let markdown = format!(
+        r#"# EGraph Visualization Tests
+
+This is a list of all the tests in the `tests` directory. Each test is a JSON file that is loaded into an EGraph and then rendered as an SVG.
+
+| Test | Image |
+| ---- | ----- |
+{}"#,
+        names
+            .iter()
+            .map(|name| {
+                format!(
+                    "| [`{}`](../tests/{}.json) | ![svg file](\"./{}.svg\") |",
+                    name, name, name
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
+    std::fs::write("./tests-viz/INDEX.md", markdown).unwrap();
+}
 
 fn test_files() -> Vec<PathBuf> {
     let mut test_files = Vec::new();
