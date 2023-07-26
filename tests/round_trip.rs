@@ -29,7 +29,7 @@ fn test_graphviz() {
     }
 
     let markdown = format!(
-        r#"# EGraph Visualization Tests
+        r#"<!-- Auto generate from tests --> # EGraph Visualization Tests
 
 This is a list of all the tests in the `tests` directory. Each test is a JSON file that is loaded into an EGraph and then rendered as an SVG.
 
@@ -40,7 +40,7 @@ This is a list of all the tests in the `tests` directory. Each test is a JSON fi
             .iter()
             .map(|name| {
                 format!(
-                    "| [`{}`](../tests/{}.json) | ![svg file](\"./{}.svg\") |",
+                    "| [`{}`](../tests/{}.json) | ![svg file](./{}.svg) |",
                     name, name, name
                 )
             })
