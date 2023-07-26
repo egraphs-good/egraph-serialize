@@ -30,7 +30,7 @@ fn test_graphviz() {
         let egraph = EGraph::from_json_file(entry.as_path()).unwrap();
         names.push(entry.file_stem().unwrap().to_str().unwrap().to_string());
 
-        // If graphviz isn't installed, just test that we can create the string, not generate the SVG
+        // If graphviz isn't installed, just test that we can create the dot string, not generate the SVG
         if no_dot {
             egraph.to_dot();
         } else {
