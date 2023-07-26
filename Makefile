@@ -7,6 +7,6 @@ test:
 
 nits:
 	@rustup component add clippy
-	cargo clippy --tests -- -D warnings
+	cargo clippy --tests --all-features -- -D warnings
 	@rustup component add rustfmt
 	cargo fmt --check
