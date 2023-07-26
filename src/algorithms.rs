@@ -62,7 +62,9 @@ impl EGraph {
                 .collect::<Vec<_>>()
                 .join(", ");
             // Remove leaf children from children
-            parent_node.children.retain(|child| !leaf_children.contains(child));
+            parent_node
+                .children
+                .retain(|child| !leaf_children.contains(child));
             let new_op = format!("{}({})", parent_node.op, args);
             parent_node.op = new_op;
         }
