@@ -48,6 +48,7 @@ impl EGraph {
         }
         // 4. Inline leaf nodes into their parents
         for (parent, leaf_children) in &parents_to_children {
+            let additional_cost = leaf_children.iter().map(|child| self.nodes.get(child).unwrap().cost).sum::<ordered_float::NotNan<f64>>();
             let parent_node = self.nodes.get_mut(parent).unwrap();
             let args = parent_node
                 .children
@@ -67,6 +68,7 @@ impl EGraph {
                 .retain(|child| !leaf_children.contains(child));
             let new_op = format!("{}({})", parent_node.op, args);
             parent_node.op = new_op;
+            parent_node.cost += additional_cost;
         }
     }
 }
