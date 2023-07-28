@@ -1,3 +1,8 @@
+#[cfg(feature = "graphviz")]
+mod graphviz;
+
+mod algorithms;
+
 use std::sync::Arc;
 
 use indexmap::{map::Entry, IndexMap};
@@ -55,7 +60,7 @@ mod id_impls {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct EGraph {
     pub nodes: IndexMap<NodeId, Node>,
     #[cfg_attr(feature = "serde", serde(default))]
@@ -178,14 +183,14 @@ fn one() -> Cost {
     Cost::new(1.0).unwrap()
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Class {
     pub id: ClassId,
     pub nodes: Vec<NodeId>,
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ClassData {
     #[cfg_attr(feature = "serde", serde(rename = "type"))]
     pub typ: Option<String>,
