@@ -37,8 +37,12 @@ fn test_graphviz() {
             let path = Path::new("./tests-viz")
                 .join(entry.file_name().unwrap())
                 .with_extension("svg");
-            println!("Writing to {:?}", path);
-            egraph.to_svg_file(path).unwrap();
+            if path.exists() {
+                println!("Skipping {:?}", path);
+            } else {
+                println!("Writing to {:?}", path);
+                egraph.to_svg_file(path).unwrap();
+            }
         }
         // Generate graphs with inlined leaves as well
         egraph.inline_leaves();
@@ -50,8 +54,12 @@ fn test_graphviz() {
                 "{}-inlined.svg",
                 entry.file_stem().unwrap().to_str().unwrap()
             ));
-            println!("Writing to {:?}", path);
-            egraph.to_svg_file(path).unwrap();
+            if path.exists() {
+                println!("Skipping {:?}", path);
+            } else {
+                println!("Writing to {:?}", path);
+                egraph.to_svg_file(path).unwrap();
+            }
         }
     }
 
