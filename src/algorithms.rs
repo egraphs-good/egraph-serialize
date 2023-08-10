@@ -31,11 +31,15 @@ impl EGraph {
         // 3. Create mapping from all parents which are updated to the children which are inlined
         let mut parents_to_children = std::collections::HashMap::new();
         for (_, node_id) in &leaves {
-            for parent in node_to_parents.get(node_id).unwrap() {
-                parents_to_children
-                    .entry(parent.clone())
-                    .or_insert_with(Vec::new)
-                    .push(node_id.clone());
+            let parents = node_to_parents.get(node_id);
+            // There will be no parents for isolated nodes with no parents or children
+            if let Some(parents) = parents {
+                for parent in parents {
+                    parents_to_children
+                        .entry(parent.clone())
+                        .or_insert_with(Vec::new)
+                        .push(node_id.clone());
+                }
             }
         }
         // 4. Inline leaf nodes into their parents
@@ -67,6 +71,10 @@ impl EGraph {
         }
         // 5. Remove leaf nodes from egraph, class data, and root eclasses
         for (eclass, node_id) in &leaves {
+            // If this node has no parents, don't remove it, since it wasn't inlined
+            if node_to_parents.get(node_id).is_none() {
+                continue;
+            }
             self.nodes.remove(node_id);
             self.class_data.remove(eclass);
             self.root_eclasses.retain(|root| root != eclass);

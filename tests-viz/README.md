@@ -6,6 +6,7 @@ This is a list of all the tests in the `tests` directory. Each test is a JSON fi
 | Test | Image | Inlined Leaves Image |
 | ---- | ----- | -------------------- |
 | [`diff_power_simple`](../tests/diff_power_simple.json) | ![svg file](./diff_power_simple.svg) | ![inlined leaves svg file](./diff_power_simple-inlined.svg) |
+| [`eqsolve`](../tests/eqsolve.json) | ![svg file](./eqsolve.svg) | ![inlined leaves svg file](./eqsolve-inlined.svg) |
 | [`fibonacci-demand`](../tests/fibonacci-demand.json) | ![svg file](./fibonacci-demand.svg) | ![inlined leaves svg file](./fibonacci-demand-inlined.svg) |
 | [`fibonacci`](../tests/fibonacci.json) | ![svg file](./fibonacci.svg) | ![inlined leaves svg file](./fibonacci-inlined.svg) |
 | [`lambda_if`](../tests/lambda_if.json) | ![svg file](./lambda_if.svg) | ![inlined leaves svg file](./lambda_if-inlined.svg) |
