@@ -172,6 +172,7 @@ fn quote(s: &str) -> String {
 }
 
 // Copied from https://doc.rust-lang.org/stable/nightly-rustc/src/rustdoc/html/escape.rs.html#10
+// but added conversion of \n to <br>
 
 /// Wrapper struct which will emit the HTML-escaped version of the contained
 /// string when passed to a format string.
@@ -191,6 +192,7 @@ impl<'a> fmt::Display for Escape<'a> {
                 '&' => "&amp;",
                 '\'' => "&#39;",
                 '"' => "&quot;",
+                '\n' => "<br>",
                 _ => continue,
             };
             fmt.write_str(&pile_o_bits[last..i])?;
