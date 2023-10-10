@@ -34,8 +34,8 @@ impl EGraph {
     }
 
     fn to_graphviz(&self) -> Graph {
-        // 1. Group nodes by typ and class
-        let mut class_nodes = std::collections::HashMap::new();
+        // 1. Group nodes by type and class (use BTreeMap to keep sorted so colors are consistent)
+        let mut class_nodes = std::collections::BTreeMap::new();
         //  and create mapping from each node ID to its class
         let mut node_to_class = std::collections::HashMap::new();
         for (node_id, node) in &self.nodes {
@@ -77,8 +77,8 @@ impl EGraph {
         ];
         // 3. Add each e-class
 
-        // Mapping of sort names to color index, use BTreeMap so that keys are sorted and colors will be consistant
-        let mut typ_colors = std::collections::BTreeMap::new();
+        // Mapping of sort names to color index
+        let mut typ_colors = std::collections::HashMap::new();
 
         for (typ, class_to_node) in class_nodes {
             let next_color = typ_colors.len() % N_COLORS + INITIAL_COLOR;
