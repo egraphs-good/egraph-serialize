@@ -81,7 +81,7 @@ impl EGraph {
         let mut typ_colors = std::collections::HashMap::new();
 
         for (typ, class_to_node) in class_nodes {
-            let next_color = typ_colors.len() % N_COLORS + INITIAL_COLOR;
+            let next_color = (typ_colors.len() + INITIAL_COLOR) % N_COLORS;
             let color = typ_colors.entry(typ).or_insert(next_color);
             stmts.push(stmt!(attr!("fillcolor", color)));
             for (class_id, nodes) in class_to_node {
