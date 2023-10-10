@@ -77,8 +77,8 @@ impl EGraph {
         ];
         // 3. Add each e-class
 
-        // Mapping of sort names to color index
-        let mut typ_colors = std::collections::HashMap::new();
+        // Mapping of sort names to color index, use BTreeMap so that keys are sorted and colors will be consistant
+        let mut typ_colors = std::collections::BTreeMap::new();
 
         for (typ, class_to_node) in class_nodes {
             let next_color = typ_colors.len() % N_COLORS + INITIAL_COLOR;
