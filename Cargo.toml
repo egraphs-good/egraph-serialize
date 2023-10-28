@@ -1,9 +1,13 @@
 [package]
 edition = "2021"
+authors = ["Max Willsey <me@mwillsey.com>"]
+description = "A library to serialize e-graphs"
 name = "egraph-serialize"
 version = "0.1.0"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+repository = "https://github.com/egraphs-good/egraph-serialize"
+keywords = ["e-graphs"]
+license = "MIT"
+readme = "README.md"
 
 [features]
 default = ["serde"]
