@@ -1,9 +1,12 @@
 use crate::EGraph;
 
+pub const MISSING_ARG_VALUE: &str = "·";
+
 impl EGraph {
     /// Inline all leaves (e-classes with a single node that has no children) into their parents, so that they
-    /// are added to the function name like f(10, ·)
-    pub fn inline_leaves(&mut self) {
+    /// are added to the function name like f(10, ·).
+    /// Returns the number of leaves inlined.
+    pub fn inline_leaves(&mut self) -> usize {
         // 1. Create mapping of eclass to nodes as well as nodes to their parents
         let mut eclass_to_nodes = std::collections::HashMap::new();
         let mut node_to_parents = std::collections::HashMap::new();
@@ -56,28 +59,54 @@ impl EGraph {
                     if leaf_children.contains(child) {
                         leave_to_op.get(child).unwrap()
                     } else {
-                        "·"
+                        MISSING_ARG_VALUE
                     }
                 })
-                .collect::<Vec<_>>()
-                .join(", ");
+                .collect::<Vec<_>>();
             // Remove leaf children from children
             parent_node
                 .children
                 .retain(|child| !leaf_children.contains(child));
-            let new_op = format!("{}({})", parent_node.op, args);
+            // If the parent node already had some children replaced, then just replace the remaining children
+            // otherwise, replace the entire op
+            let new_op = if parent_node.op.matches(MISSING_ARG_VALUE).count() == args.len() {
+                // Replace all instances of MISSING_ARG_VALUE with the corresponding arg by interleaving
+                // the op split by MISSING_ARG_VALUE with the args
+                parent_node
+                    .op
+                    .split(MISSING_ARG_VALUE)
+                    .enumerate()
+                    .flat_map(|(i, s)| {
+                        if i == args.len() {
+                            vec![s.to_string()]
+                        } else {
+                            vec![s.to_string(), args[i].to_string()]
+                        }
+                    })
+                    .collect::<String>()
+            } else {
+                format!("{}({})", parent_node.op, args.join(", "))
+            };
             parent_node.op = new_op;
             parent_node.cost += additional_cost;
         }
+        let mut n_inlined = 0;
         // 5. Remove leaf nodes from egraph, class data, and root eclasses
         for (eclass, node_id) in &leaves {
             // If this node has no parents, don't remove it, since it wasn't inlined
             if node_to_parents.get(node_id).is_none() {
                 continue;
             }
+            n_inlined += 1;
             self.nodes.remove(node_id);
             self.class_data.remove(eclass);
             self.root_eclasses.retain(|root| root != eclass);
         }
+        n_inlined
+    }
+
+    /// Inline all leaves (e-classes with a single node that has no children) into their parents, recursively.
+    pub fn saturate_inline_leaves(&mut self) {
+        while self.inline_leaves() > 0 {}
     }
 }
