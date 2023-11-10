@@ -34,8 +34,8 @@ impl EGraph {
     }
 
     fn to_graphviz(&self) -> Graph {
-        // 1. Group nodes by typ and class
-        let mut class_nodes = std::collections::HashMap::new();
+        // 1. Group nodes by type and class (use BTreeMap to keep sorted so colors are consistent)
+        let mut class_nodes = std::collections::BTreeMap::new();
         //  and create mapping from each node ID to its class
         let mut node_to_class = std::collections::HashMap::new();
         for (node_id, node) in &self.nodes {
@@ -81,7 +81,7 @@ impl EGraph {
         let mut typ_colors = std::collections::HashMap::new();
 
         for (typ, class_to_node) in class_nodes {
-            let next_color = typ_colors.len() % N_COLORS + INITIAL_COLOR;
+            let next_color = (typ_colors.len() + INITIAL_COLOR) % N_COLORS;
             let color = typ_colors.entry(typ).or_insert(next_color);
             stmts.push(stmt!(attr!("fillcolor", color)));
             for (class_id, nodes) in class_to_node {
@@ -149,7 +149,7 @@ const INITIAL_COLOR: usize = 2;
 /// Returns an html label for the node with the function name and ports for each argumetn
 fn html_label(label: &str, n_args: usize) -> String {
     format!(
-        "<<TABLE BGCOLOR=\"white\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" style=\"rounded\"><tr><td CELLPADDING=\"4\" WIDTH=\"30\" HEIGHT=\"30\"{}>{}</td></tr>{}</TABLE>>",
+        "<<TABLE BGCOLOR=\"white\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" style=\"rounded\"><tr><td BALIGN=\"left\" CELLPADDING=\"4\" WIDTH=\"30\" HEIGHT=\"30\"{}>{}</td></tr>{}</TABLE>>",
         (if n_args  == 0 {"".to_string()} else {format!(" colspan=\"{}\"", n_args)}),
         Escape(label),
         (if n_args == 0 {
@@ -172,6 +172,7 @@ fn quote(s: &str) -> String {
 }
 
 // Copied from https://doc.rust-lang.org/stable/nightly-rustc/src/rustdoc/html/escape.rs.html#10
+// but added conversion of \n to <br/>
 
 /// Wrapper struct which will emit the HTML-escaped version of the contained
 /// string when passed to a format string.
@@ -191,6 +192,7 @@ impl<'a> fmt::Display for Escape<'a> {
                 '&' => "&amp;",
                 '\'' => "&#39;",
                 '"' => "&quot;",
+                '\n' => "<br/>",
                 _ => continue,
             };
             fmt.write_str(&pile_o_bits[last..i])?;
