@@ -130,7 +130,7 @@ impl EGraph {
     #[cfg(feature = "serde")]
     pub fn to_json_file(&self, path: impl AsRef<std::path::Path>) -> std::io::Result<()> {
         let file = std::fs::File::create(path)?;
-        serde_json::to_writer(std::io::BufWriter::new(file), self)?;
+        serde_json::to_writer_pretty(std::io::BufWriter::new(file), self)?;
         Ok(())
     }
 
