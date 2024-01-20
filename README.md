@@ -43,4 +43,4 @@ Don't forget to add something to `root_eclasses` on the resulting serialized egr
 Check out the [`./tests-viz`](./tests-viz/README.md) directory to view visualizations of all the test cases with Graphviz.
 
 
-To remake them, run `make tests-viz` from the root of this repo. You'll need to have [Graphviz](https://graphviz.org/) installed.
+To remake them, run `make tests` from the root of this repo. Any tests that don't have SVG visualizations created yet will be generated. You'll need to have [Graphviz](https://graphviz.org/) installed.
