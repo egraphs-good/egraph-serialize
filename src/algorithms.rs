@@ -204,8 +204,8 @@ impl EGraph {
                     }
                 }
             }
+            // reset the classes computation
             self.once_cell_classes.take();
         }
-        // reset the classes computation
     }
 }
