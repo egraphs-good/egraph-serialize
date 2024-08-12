@@ -57,7 +57,7 @@ impl EGraph {
             stmt!(GraphAttributes::compound(true)),
             // Set default sub-graph rank to be same so that all nodes in e-class are on same level
             stmt!(SubgraphAttributes::rank(rank::same)),
-            stmt!(GraphAttributes::fontname("helvetica".to_string())),
+            stmt!(GraphAttributes::fontname("monospace".to_string())),
             stmt!(GraphAttributes::fontsize(9.0)),
             stmt!(GraphAttributes::margin(3.0)),
             stmt!(GraphAttributes::nodesep(0.05)),
@@ -67,7 +67,7 @@ impl EGraph {
             stmt!(GA::Node(vec![
                 NodeAttributes::shape(shape::none),
                 NodeAttributes::margin(0.0),
-                NodeAttributes::fontname("helvetica".to_string())
+                NodeAttributes::fontname("monospace".to_string())
             ])),
             // Draw edges first, so that they are behind nodes
             stmt!(GraphAttributes::outputorder(outputorder::edgesfirst)),
