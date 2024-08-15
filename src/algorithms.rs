@@ -191,6 +191,11 @@ impl EGraph {
                         self.nodes.insert(new_id.into(), new_unique_node);
                     }
                     // If there are other nodes, then make one more copy and point all the parents at that
+                    let parents = parents.get(&id).cloned().unwrap_or_default();
+                    if parents.is_empty() {
+                        continue;
+                    }
+                    changed = true;
                     let new_id = format!("split-{}-{}", offset, unique_node_id);
                     let new_class_id: ClassId = new_id.clone().into();
                     // Copy the class data if it exists
@@ -202,8 +207,7 @@ impl EGraph {
                     let mut new_unique_node = unique_node.clone();
                     new_unique_node.eclass = new_class_id;
                     self.nodes.insert(new_id.clone().into(), new_unique_node);
-                    for (parent_id, position) in parents.get(&id).cloned().unwrap_or_default() {
-                        changed = true;
+                    for (parent_id, position) in parents {
                         // Change the child of the parent to the new node
                         self.nodes.get_mut(&parent_id).unwrap().children[position] =
                             new_id.clone().into();
