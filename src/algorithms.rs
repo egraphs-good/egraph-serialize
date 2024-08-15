@@ -112,16 +112,26 @@ impl EGraph {
         while self.inline_leaves() > 0 {}
     }
 
-    /// Splits e-classes with these nodes into multiple e-classes, copying the node into each. Also will create
-    /// a new e-class for each node pointing to any e-class with a node that should be split.
+    /// Given some function `should_split`, after calling this method, all nodes where it is true will have at most
+    /// one other node in their e-class and if they have parents, will no other nodes in their e-class.
     ///
-    /// Note that if any of these nodes appear twice in an e-class then it will panic.
+    /// All nodes in an e-class shared with a split node will still be in a e-class with that node, but no longer
+    /// in an e-class with each other.
     ///
-    /// Class data will be copied to new nodes.
+    /// This is used to help make the visualization easier to parse, by breaking cycles and allowing these split nodes
+    /// to be later inlined into their parents with `inline_leaves`, which only applies when there is a single node in an
+    /// e-class.
     ///
-    /// This can be used for example to make multiple e-classes for all nodes equivalent to i64(0), to make it easier
-    /// to visualize this.
-    pub fn split_e_classes(&mut self, should_split: impl Fn(&NodeId, &Node) -> bool) {
+    /// For example, if we split on all "primitive" nodes or their wrappers, like Int(1), then those nodes
+    /// can then be inlined into their parents and are all nodes equal to them are no longer in single e-class,
+    /// making the graph layout easier to understand.
+    ///
+    /// Note that `should_split` should only ever be true for either a single node, or no nodes, in an e-class.
+    /// If it is true for multiple nodes in an e-class, then this method will panic.
+    ///
+    /// Another way to think about it is that any isomporphic function can be split, since if f(a) = f(b) then a = b,
+    /// in that case.
+    pub fn split_classes(&mut self, should_split: impl Fn(&NodeId, &Node) -> bool) {
         // run till fixpoint since splitting a node might add more parents and require splitting the child down the line
         let mut changed = true;
         while changed {
