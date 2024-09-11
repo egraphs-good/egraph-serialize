@@ -163,14 +163,6 @@ impl std::ops::Index<&ClassId> for EGraph {
 }
 
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-#[derive(Debug, Default, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct NodeData {
-    //
-    #[cfg_attr(feature = "serde", serde(default))]
-    pub subsumed: bool,
-}
-
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Node {
     pub op: String,
@@ -179,9 +171,8 @@ pub struct Node {
     pub eclass: ClassId,
     #[cfg_attr(feature = "serde", serde(default = "one"))]
     pub cost: Cost,
-    // Optional data about the node
     #[cfg_attr(feature = "serde", serde(default))]
-    pub data: NodeData,
+    pub subsumed: bool,
 }
 
 impl Node {
