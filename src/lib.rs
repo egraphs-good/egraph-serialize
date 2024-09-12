@@ -171,6 +171,8 @@ pub struct Node {
     pub eclass: ClassId,
     #[cfg_attr(feature = "serde", serde(default = "one"))]
     pub cost: Cost,
+    #[cfg_attr(feature = "serde", serde(default))]
+    pub subsumed: bool,
 }
 
 impl Node {
