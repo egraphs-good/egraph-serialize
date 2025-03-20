@@ -98,12 +98,13 @@ impl EGraph {
                     for (i, child) in node.children.iter().enumerate() {
                         let source = node_id!(quoted_node_id, port!(id!(i), "s"));
                         let target = node_id!(quote(child.as_ref()));
-                        let child_eclass = node_to_class.get(child).unwrap();
-                        let child_subgraph_id = format!("cluster_{}", child_eclass);
-                        let edge = edge!(source => target; EdgeAttributes::lhead(quote(&child_subgraph_id)));
-                        // Make sure edge is part of outer statements so it doesn't add nodes to the subgraph which
-                        // don't belong there
-                        stmts.push(stmt!(edge));
+                        if let Some(child_eclass) = node_to_class.get(child) {
+                            let child_subgraph_id = format!("cluster_{}", child_eclass);
+                            let edge = edge!(source => target; EdgeAttributes::lhead(quote(&child_subgraph_id)));
+                            // Make sure edge is part of outer statements so it doesn't add nodes to the subgraph which
+                            // don't belong there
+                            stmts.push(stmt!(edge));
+                        }
                     }
                     let node = node!(quoted_node_id;NodeAttributes::label(html_label), NodeAttributes::tooltip(quoted_tooltip));
                     inner_stmts.push(stmt!(node));
