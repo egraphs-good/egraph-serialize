@@ -148,7 +148,7 @@ impl std::ops::Index<&NodeId> for EGraph {
     fn index(&self, index: &NodeId) -> &Self::Output {
         self.nodes
             .get(index)
-            .unwrap_or_else(|| panic!("No node with id {:?}", index))
+            .unwrap_or_else(|| panic!("No node with id {index:?}"))
     }
 }
 
@@ -158,7 +158,7 @@ impl std::ops::Index<&ClassId> for EGraph {
     fn index(&self, index: &ClassId) -> &Self::Output {
         self.classes()
             .get(index)
-            .unwrap_or_else(|| panic!("No class with id {:?}", index))
+            .unwrap_or_else(|| panic!("No class with id {index:?}"))
     }
 }
 
