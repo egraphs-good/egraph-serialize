@@ -1,5 +1,4 @@
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use egraph_serialize::*;
 
@@ -7,7 +6,7 @@ use egraph_serialize::*;
 fn test_round_trip() {
     let mut n_tested = 0;
     for entry in test_files() {
-        println!("Testing {:?}", entry);
+        println!("Testing {entry:?}");
         let egraph = EGraph::from_json_file(entry.as_path()).unwrap();
         egraph.test_round_trip();
         n_tested += 1;
@@ -26,7 +25,7 @@ fn test_graphviz() {
 
     let mut names = Vec::new();
     for entry in test_files() {
-        println!("Testing graphviz {:?}", entry);
+        println!("Testing graphviz {entry:?}");
         let mut egraph = EGraph::from_json_file(entry.as_path()).unwrap();
         names.push(entry.file_stem().unwrap().to_str().unwrap().to_string());
 
@@ -38,9 +37,9 @@ fn test_graphviz() {
                 .join(entry.file_name().unwrap())
                 .with_extension("svg");
             if path.exists() {
-                println!("Skipping {:?}", path);
+                println!("Skipping {path:?}");
             } else {
-                println!("Writing to {:?}", path);
+                println!("Writing to {path:?}");
                 egraph.to_svg_file(path).unwrap();
             }
         }
@@ -55,9 +54,9 @@ fn test_graphviz() {
                 entry.file_stem().unwrap().to_str().unwrap()
             ));
             if path.exists() {
-                println!("Skipping {:?}", path);
+                println!("Skipping {path:?}");
             } else {
-                println!("Writing to {:?}", path);
+                println!("Writing to {path:?}");
                 egraph.to_svg_file(path).unwrap();
             }
         }
@@ -72,9 +71,9 @@ fn test_graphviz() {
                 entry.file_stem().unwrap().to_str().unwrap()
             ));
             if path.exists() {
-                println!("Skipping {:?}", path);
+                println!("Skipping {path:?}");
             } else {
-                println!("Writing to {:?}", path);
+                println!("Writing to {path:?}");
                 egraph.to_svg_file(path).unwrap();
             }
         }
@@ -93,8 +92,7 @@ This is a list of all the tests in the `tests` directory. Each test is a JSON fi
             .iter()
             .map(|name| {
                 format!(
-                    "| [`{}`](../tests/{}.json) | ![svg file](./{}.svg) | ![inlined leaves svg file](./{}-inlined.svg) | ![inlined leaves saturated svg file](./{}-inlined-saturated.svg) |",
-                    name, name, name, name, name
+                    "| [`{name}`](../tests/{name}.json) | ![svg file](./{name}.svg) | ![inlined leaves svg file](./{name}-inlined.svg) | ![inlined leaves saturated svg file](./{name}-inlined-saturated.svg) |"
                 )
             })
             .collect::<Vec<_>>()

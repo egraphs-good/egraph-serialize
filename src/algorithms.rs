@@ -157,8 +157,7 @@ impl EGraph {
                     .partition(|node_id| should_split(node_id, &self.nodes[node_id]));
                 if unique_nodes.len() > 1 {
                     panic!(
-                        "Multiple nodes in one e-class should be split. E-class: {:?} Nodes: {:?}",
-                        id, unique_nodes
+                        "Multiple nodes in one e-class should be split. E-class: {id:?} Nodes: {unique_nodes:?}"
                     );
                 }
                 let unique_node = unique_nodes.into_iter().next();
@@ -175,7 +174,7 @@ impl EGraph {
                     for other_node_id in other_nodes.into_iter().skip(1) {
                         changed = true;
                         // use same ID for new class and new node added to that class
-                        let new_id = format!("split-{}-{}", offset, unique_node_id);
+                        let new_id = format!("split-{offset}-{unique_node_id}");
                         offset += 1;
                         let new_class_id: ClassId = new_id.clone().into();
                         // Copy the class data if it exists
@@ -196,7 +195,7 @@ impl EGraph {
                         continue;
                     }
                     changed = true;
-                    let new_id = format!("split-{}-{}", offset, unique_node_id);
+                    let new_id = format!("split-{offset}-{unique_node_id}");
                     let new_class_id: ClassId = new_id.clone().into();
                     // Copy the class data if it exists
                     if let Some(class_data) = &class_data {

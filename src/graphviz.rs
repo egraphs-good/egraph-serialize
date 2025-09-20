@@ -90,7 +90,7 @@ impl EGraph {
                 // Add nodes
                 for (node_id, node) in nodes {
                     let label = node.op.as_ref();
-                    let tooltip = format!("{}: {}", class_id, node_id);
+                    let tooltip = format!("{class_id}: {node_id}");
                     let html_label = html_label(label, node.children.len());
                     let quoted_tooltip = quote(&tooltip);
                     let quoted_node_id = quote(node_id.as_ref());
@@ -99,7 +99,7 @@ impl EGraph {
                         let source = node_id!(quoted_node_id, port!(id!(i), "s"));
                         let target = node_id!(quote(child.as_ref()));
                         let child_eclass = node_to_class.get(child).unwrap();
-                        let child_subgraph_id = format!("cluster_{}", child_eclass);
+                        let child_subgraph_id = format!("cluster_{child_eclass}");
                         let edge = edge!(source => target; EdgeAttributes::lhead(quote(&child_subgraph_id)));
                         // Make sure edge is part of outer statements so it doesn't add nodes to the subgraph which
                         // don't belong there
@@ -109,8 +109,8 @@ impl EGraph {
                     inner_stmts.push(stmt!(node));
                 }
 
-                let subgraph_id = format!("cluster_{}", class_id);
-                let outer_subgraph_id = quote(&format!("outer_{}", subgraph_id));
+                let subgraph_id = format!("cluster_{class_id}");
+                let outer_subgraph_id = quote(&format!("outer_{subgraph_id}"));
                 let quoted_subgraph_id = quote(&subgraph_id);
 
                 let subgraph = subgraph!(outer_subgraph_id;
@@ -150,7 +150,7 @@ const INITIAL_COLOR: usize = 2;
 fn html_label(label: &str, n_args: usize) -> String {
     format!(
         "<<TABLE BGCOLOR=\"white\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"0\" style=\"rounded\"><tr><td BALIGN=\"left\" CELLPADDING=\"4\" WIDTH=\"30\" HEIGHT=\"30\"{}>{}</td></tr>{}</TABLE>>",
-        (if n_args  == 0 {"".to_string()} else {format!(" colspan=\"{}\"", n_args)}),
+        (if n_args  == 0 {"".to_string()} else {format!(" colspan=\"{n_args}\"")}),
         Escape(label),
         (if n_args == 0 {
             "".to_string()
@@ -158,7 +158,7 @@ fn html_label(label: &str, n_args: usize) -> String {
             format!(
                 "<TR>{}</TR>",
                 (0..n_args)
-                    .map(|i| format!("<TD PORT=\"{}\"></TD>", i))
+                    .map(|i| format!("<TD PORT=\"{i}\"></TD>"))
                     .collect::<Vec<String>>()
                     .join("")
             )
@@ -168,7 +168,7 @@ fn html_label(label: &str, n_args: usize) -> String {
 
 /// Adds double quotes and escapes the quotes in the string
 fn quote(s: &str) -> String {
-    format!("{:?}", s)
+    format!("{s:?}")
 }
 
 // Copied from https://doc.rust-lang.org/stable/nightly-rustc/src/rustdoc/html/escape.rs.html#10
