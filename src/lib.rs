@@ -198,6 +198,6 @@ pub struct ClassData {
     #[cfg_attr(feature = "serde", serde(rename = "type"))]
     pub typ: Option<String>,
 
-    #[serde(flatten)]
+    #[cfg_attr(feature = "serde", serde(flatten))]
     pub extra: HashMap<String, String>,
 }
