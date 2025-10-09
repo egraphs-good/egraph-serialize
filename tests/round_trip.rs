@@ -56,7 +56,7 @@ fn test_graphviz() {
             if path.exists() {
                 println!("Skipping {path:?}");
             } else {
-                println!("Writing to {path:?}");
+                println!("{}", egraph.to_dot());
                 egraph.to_svg_file(path).unwrap();
             }
         }
