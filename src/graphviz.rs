@@ -179,8 +179,8 @@ fn class_html_label(extra: HashMap<String, String>) -> String {
     let rows = extra.iter().map(|(key, value)| {
         format!(
             "<TR><TD ALIGN=\"RIGHT\">{}</TD><TD ALIGN=\"LEFT\">{}</TD></TR>",
-            Escape(&key),
-            Escape(&value)
+            Escape(key),
+            Escape(value)
         )
     });
     format!(
