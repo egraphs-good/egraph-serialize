@@ -41,7 +41,6 @@ impl EGraph {
         for (node_id, node) in &self.nodes {
             let class_data = self.class_data.get(&node.eclass);
             let typ = class_data.and_then(|data| data.typ.clone());
-            // extra if is none empty
             let extra = class_data.and_then(|data| {
                 if data.extra.is_empty() {
                     None
@@ -177,15 +176,16 @@ fn html_label(label: &str, n_args: usize) -> String {
 }
 
 fn class_html_label(extra: HashMap<String, String>) -> String {
-    let mut rows = Vec::new();
-    for (key, value) in extra {
-        rows.push(format!(
-            "<TR><TD ALIGN=\"RIGHT\">{key}</TD><TD ALIGN=\"LEFT\">{value}</TD></TR>"
-        ));
-    }
+    let rows = extra.iter().map(|(key, value)| {
+        format!(
+            "<TR><TD ALIGN=\"RIGHT\">{}</TD><TD ALIGN=\"LEFT\">{}</TD></TR>",
+            Escape(&key),
+            Escape(&value)
+        )
+    });
     format!(
         "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"2\">{}</TABLE>>",
-        rows.join("")
+        rows.collect::<Vec<String>>().join("")
     )
 }
 
