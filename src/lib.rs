@@ -3,6 +3,7 @@ mod graphviz;
 
 mod algorithms;
 
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use indexmap::{map::Entry, IndexMap};
@@ -196,4 +197,7 @@ pub struct Class {
 pub struct ClassData {
     #[cfg_attr(feature = "serde", serde(rename = "type"))]
     pub typ: Option<String>,
+
+    #[cfg_attr(feature = "serde", serde(flatten))]
+    pub extra: HashMap<String, String>,
 }
