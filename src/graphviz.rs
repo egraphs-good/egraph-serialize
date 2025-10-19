@@ -1,4 +1,4 @@
-use std::{fmt, io::Write};
+use std::{collections::HashMap, fmt, io::Write};
 
 use crate::EGraph;
 use graphviz_rust::{
@@ -39,16 +39,22 @@ impl EGraph {
         //  and create mapping from each node ID to its class
         let mut node_to_class = std::collections::HashMap::new();
         for (node_id, node) in &self.nodes {
-            let typ = self
-                .class_data
-                .get(&node.eclass)
-                .and_then(|data| data.typ.clone());
+            let class_data = self.class_data.get(&node.eclass);
+            let typ = class_data.and_then(|data| data.typ.clone());
+            let extra = class_data.and_then(|data| {
+                if data.extra.is_empty() {
+                    None
+                } else {
+                    Some(data.extra.clone())
+                }
+            });
             node_to_class.insert(node_id.clone(), node.eclass.clone());
             class_nodes
                 .entry(typ)
                 .or_insert_with(std::collections::HashMap::new)
                 .entry(node.eclass.clone())
-                .or_insert_with(Vec::new)
+                .or_insert_with(|| (extra, Vec::new()))
+                .1
                 .push((node_id.clone(), node));
         }
         // 2. Start with configuration
@@ -84,7 +90,7 @@ impl EGraph {
             let next_color = (typ_colors.len() + INITIAL_COLOR) % N_COLORS;
             let color = typ_colors.entry(typ).or_insert(next_color);
             stmts.push(stmt!(attr!("fillcolor", color)));
-            for (class_id, nodes) in class_to_node {
+            for (class_id, (extra, nodes)) in class_to_node {
                 let mut inner_stmts = vec![];
 
                 // Add nodes
@@ -113,14 +119,17 @@ impl EGraph {
                 let outer_subgraph_id = quote(&format!("outer_{subgraph_id}"));
                 let quoted_subgraph_id = quote(&subgraph_id);
 
+                let mut inner_subgraph = subgraph!(quoted_subgraph_id; subgraph!("", inner_stmts));
+                if let Some(extra) = extra {
+                    inner_subgraph
+                        .add_stmt(stmt!(SubgraphAttributes::label(class_html_label(extra))));
+                }
+                // Nest in empty sub-graph so that we can use rank=same
+                // https://stackoverflow.com/a/55562026/907060
                 let subgraph = subgraph!(outer_subgraph_id;
                     // Disable label for now, to reduce size
                     // NodeAttributes::label(subgraph_html_label(&typ)),
-
-                    // Nest in empty sub-graph so that we can use rank=same
-                    // https://stackoverflow.com/a/55562026/907060
-                    subgraph!(quoted_subgraph_id; subgraph!("", inner_stmts)),
-
+                    inner_subgraph,
                     // Make outer subgraph a cluster but make it invisible, so just used for padding
                     // https://forum.graphviz.org/t/how-to-add-space-between-clusters/1209/3
                     SubgraphAttributes::style(quote("invis")),
@@ -163,6 +172,20 @@ fn html_label(label: &str, n_args: usize) -> String {
                     .join("")
             )
         })
+    )
+}
+
+fn class_html_label(extra: HashMap<String, String>) -> String {
+    let rows = extra.iter().map(|(key, value)| {
+        format!(
+            "<TR><TD ALIGN=\"RIGHT\">{}</TD><TD ALIGN=\"LEFT\">{}</TD></TR>",
+            Escape(key),
+            Escape(value)
+        )
+    });
+    format!(
+        "<<TABLE BORDER=\"0\" CELLBORDER=\"0\" CELLSPACING=\"0\" CELLPADDING=\"2\">{}</TABLE>>",
+        rows.collect::<Vec<String>>().join("")
     )
 }
 
