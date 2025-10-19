@@ -75,7 +75,7 @@ checksum = "498cfcded997a93eb31edd639361fa33fd229a8784e953b37d71035fe3890b7b"
 
 [[package]]
 name = "egraph-serialize"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "glob",
  "graphviz-rust",

@@ -2,7 +2,12 @@
 
 ## [Unreleased] - ReleaseDate
 
-## [0.2.0] - 2024-9-??
+## [0.3.0] - 2025-10-18
+
+- Updated dependencies
+- Allow arbitrary class data (#23)
+
+## [0.2.0] - 2024-9-28
 
 New features
 
