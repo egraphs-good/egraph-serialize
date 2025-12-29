@@ -13,6 +13,7 @@ readme = "README.md"
 default = ["serde"]
 serde = ["dep:serde", "dep:serde_json", "indexmap/serde", "ordered-float/serde"]
 graphviz = ["dep:graphviz-rust"]
+graphviz-exec = ["graphviz", "graphviz-rust/graphviz-exec"]
 
 [dependencies]
 indexmap = "2"
@@ -31,6 +32,7 @@ optional = true
 version = "1.0.100"
 
 [dependencies.graphviz-rust]
+default-features = false
 optional = true
 version = "0.9"
 

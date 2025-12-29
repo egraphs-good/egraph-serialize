@@ -16,6 +16,7 @@ impl EGraph {
         self.to_graphviz().print(&mut PrinterContext::default())
     }
 
+    #[cfg(feature = "graphviz-exec")]
     pub fn to_svg_file(&self, path: impl AsRef<std::path::Path>) -> std::io::Result<()> {
         graphviz_rust::exec_dot(
             self.to_dot(),

@@ -42,5 +42,10 @@ Don't forget to add something to `root_eclasses` on the resulting serialized egr
 
 Check out the [`./tests-viz`](./tests-viz/README.md) directory to view visualizations of all the test cases with Graphviz.
 
+To remake them, run `make tests` from the root of this repo. 
 
-To remake them, run `make tests` from the root of this repo. Any tests that don't have SVG visualizations created yet will be generated. You'll need to have [Graphviz](https://graphviz.org/) installed.
+### SVG Generation 
+Generating SVG files requires having [Graphviz](https://graphviz.org/) installed. This cannot be distributed through rust's crates toolchain, so the function `to_svg_file` is gated behind the `graphviz-exec` feature flag. 
+
+### DOT Generation
+The `graphviz-rust` crate can produce `.dot` files without requiring the existence of the [Graphviz](https://graphviz.org/) CLI tool. Therefore creation of dot files and other functionality which only relies on `graphviz-rust` is gated behind the `graphviz` feature flag. 
