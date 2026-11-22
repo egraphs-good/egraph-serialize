@@ -270,12 +270,16 @@ mod tests {
             },
         );
         egraph.root_eclasses = vec![cid("c_top"), cid("c_root")];
+        // Populate the cached classes map before inlining to verify cache invalidation.
+        assert!(egraph.classes().contains_key(&cid("c_plain")));
 
         assert_eq!(egraph.inline_leaves(), 1);
         assert!(egraph.nodes.contains_key(&nid("n_root")));
         assert!(!egraph.nodes.contains_key(&nid("n_plain")));
         assert_eq!(egraph.root_eclasses, vec![cid("c_top"), cid("c_root")]);
         assert_eq!(egraph.nodes[&nid("n_top")].op, "f(·, p)");
+        assert!(!egraph.classes().contains_key(&cid("c_plain")));
+        assert!(egraph.classes().contains_key(&cid("c_root")));
         assert_eq!(egraph.classes()[&cid("c_top")].nodes, vec![nid("n_top")]);
     }
 
