@@ -1,14 +1,16 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::{Class, ClassId, EGraph, Node, NodeId};
 
 pub const MISSING_ARG_VALUE: &str = "·";
 
 impl EGraph {
-    /// Inline all leaves (e-classes with a single node that has no children) into their parents, so that they
-    /// are added to the function name like f(10, ·).
+    /// Inline leaves (e-classes with a single unsubsumed node that has no children,
+    /// is not in `root_eclasses`, and carries no extra `class_data` metadata) into their
+    /// parents, so that they are formatted in the parent's `op` like `f(10, ·)`.
     /// Returns the number of leaves inlined.
     pub fn inline_leaves(&mut self) -> usize {
+        let root_eclasses: HashSet<ClassId> = self.root_eclasses.iter().cloned().collect();
         // 1. Create mapping of eclass to nodes as well as nodes to their parents
         let mut eclass_to_nodes = std::collections::HashMap::new();
         let mut node_to_parents = std::collections::HashMap::new();
@@ -24,11 +26,20 @@ impl EGraph {
                     .push(node_id.clone());
             }
         }
-        // 2. Find all leaves (e-classes with a single node that has no children and also not in root-eclasses)
+        // 2. Find all leaves (e-classes with a single unsubsumed childless node that is
+        // not a root e-class and has no extra class_data metadata)
         let mut leaves = Vec::new();
         let mut leave_to_op = std::collections::HashMap::new();
         for (eclass, nodes) in eclass_to_nodes {
-            if nodes.len() == 1 && nodes[0].1.children.is_empty() {
+            if nodes.len() == 1
+                && nodes[0].1.children.is_empty()
+                && !nodes[0].1.subsumed
+                && !root_eclasses.contains(&eclass)
+                && self
+                    .class_data
+                    .get(&eclass)
+                    .is_none_or(|data| data.extra.is_empty())
+            {
                 leaves.push((eclass, nodes[0].0.clone()));
                 leave_to_op.insert(nodes[0].0.clone(), nodes[0].1.op.clone());
             }
@@ -93,7 +104,7 @@ impl EGraph {
             parent_node.cost += additional_cost;
         }
         let mut n_inlined = 0;
-        // 5. Remove leaf nodes from egraph, class data, and root eclasses
+        // 5. Remove inlined leaf nodes and any type-only class_data entries
         for (eclass, node_id) in &leaves {
             // If this node has no parents, don't remove it, since it wasn't inlined
             if !node_to_parents.contains_key(node_id) {
@@ -102,12 +113,14 @@ impl EGraph {
             n_inlined += 1;
             self.nodes.swap_remove(node_id);
             self.class_data.swap_remove(eclass);
-            self.root_eclasses.retain(|root| root != eclass);
+        }
+        if n_inlined > 0 {
+            self.once_cell_classes.take();
         }
         n_inlined
     }
 
-    /// Inline all leaves (e-classes with a single node that has no children) into their parents, recursively.
+    /// Inline all eligible leaves into their parents, recursively.
     pub fn saturate_inline_leaves(&mut self) {
         while self.inline_leaves() > 0 {}
     }
@@ -216,5 +229,167 @@ impl EGraph {
             // reset the classes computation
             self.once_cell_classes.take();
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{ClassData, ClassId, Cost, EGraph, Node, NodeId};
+
+    fn nid(id: &str) -> NodeId {
+        NodeId::from(id)
+    }
+
+    fn cid(id: &str) -> ClassId {
+        ClassId::from(id)
+    }
+
+    fn leaf_node(op: &str, eclass: &str) -> Node {
+        Node {
+            op: op.to_string(),
+            children: vec![],
+            eclass: cid(eclass),
+            cost: Cost::new(1.0).unwrap(),
+            subsumed: false,
+        }
+    }
+
+    #[test]
+    fn inline_leaves_skips_root_eclasses() {
+        let mut egraph = EGraph::default();
+        egraph.add_node("n_root", leaf_node("r", "c_root"));
+        egraph.add_node("n_plain", leaf_node("p", "c_plain"));
+        egraph.add_node(
+            "n_top",
+            Node {
+                op: "f".to_string(),
+                children: vec![nid("n_root"), nid("n_plain")],
+                eclass: cid("c_top"),
+                cost: Cost::new(1.0).unwrap(),
+                subsumed: false,
+            },
+        );
+        egraph.root_eclasses = vec![cid("c_top"), cid("c_root")];
+        // Populate the cached classes map before inlining to verify cache invalidation.
+        assert!(egraph.classes().contains_key(&cid("c_plain")));
+
+        assert_eq!(egraph.inline_leaves(), 1);
+        assert!(egraph.nodes.contains_key(&nid("n_root")));
+        assert!(!egraph.nodes.contains_key(&nid("n_plain")));
+        assert_eq!(egraph.root_eclasses, vec![cid("c_top"), cid("c_root")]);
+        assert_eq!(egraph.nodes[&nid("n_top")].op, "f(·, p)");
+        assert!(!egraph.classes().contains_key(&cid("c_plain")));
+        assert!(egraph.classes().contains_key(&cid("c_root")));
+        assert_eq!(egraph.classes()[&cid("c_top")].nodes, vec![nid("n_top")]);
+    }
+
+    #[test]
+    fn inline_leaves_skips_extra_class_data_and_inlines_plain_type() {
+        let mut egraph = EGraph::default();
+        egraph.add_node("n_meta", leaf_node("m", "c_meta"));
+        egraph.add_node("n_typed", leaf_node("t", "c_typed"));
+        egraph.add_node(
+            "n_top",
+            Node {
+                op: "g".to_string(),
+                children: vec![nid("n_meta"), nid("n_typed")],
+                eclass: cid("c_top"),
+                cost: Cost::new(1.0).unwrap(),
+                subsumed: false,
+            },
+        );
+        egraph.class_data.insert(
+            cid("c_meta"),
+            ClassData {
+                typ: Some("Val".to_string()),
+                extra: [("label".to_string(), "keep".to_string())]
+                    .into_iter()
+                    .collect(),
+            },
+        );
+        egraph.class_data.insert(
+            cid("c_typed"),
+            ClassData {
+                typ: Some("Val".to_string()),
+                extra: Default::default(),
+            },
+        );
+
+        assert_eq!(egraph.inline_leaves(), 1);
+        assert!(egraph.nodes.contains_key(&nid("n_meta")));
+        assert!(egraph.class_data.contains_key(&cid("c_meta")));
+        assert!(!egraph.nodes.contains_key(&nid("n_typed")));
+        assert!(!egraph.class_data.contains_key(&cid("c_typed")));
+        assert_eq!(egraph.nodes[&nid("n_top")].op, "g(·, t)");
+    }
+
+    #[test]
+    fn inline_leaves_skips_subsumed_leaves() {
+        let mut egraph = EGraph::default();
+        let mut sub = leaf_node("s", "c_sub");
+        sub.subsumed = true;
+        egraph.add_node("n_sub", sub);
+        egraph.add_node(
+            "n_top",
+            Node {
+                op: "h".to_string(),
+                children: vec![nid("n_sub")],
+                eclass: cid("c_top"),
+                cost: Cost::new(1.0).unwrap(),
+                subsumed: false,
+            },
+        );
+
+        assert_eq!(egraph.inline_leaves(), 0);
+        assert!(egraph.nodes.contains_key(&nid("n_sub")));
+    }
+
+    #[test]
+    fn saturate_inline_leaves_preserves_roots_metadata_and_subsumed() {
+        let mut egraph = EGraph::default();
+        egraph.add_node("n_plain", leaf_node("x", "c_plain"));
+        egraph.add_node("n_root", leaf_node("r", "c_root"));
+        egraph.add_node("n_meta", leaf_node("m", "c_meta"));
+        let mut sub = leaf_node("s", "c_sub");
+        sub.subsumed = true;
+        egraph.add_node("n_sub", sub);
+        egraph.add_node(
+            "n_mid",
+            Node {
+                op: "wrap".to_string(),
+                children: vec![nid("n_plain")],
+                eclass: cid("c_mid"),
+                cost: Cost::new(1.0).unwrap(),
+                subsumed: false,
+            },
+        );
+        egraph.add_node(
+            "n_top",
+            Node {
+                op: "pair".to_string(),
+                children: vec![nid("n_mid"), nid("n_root"), nid("n_meta"), nid("n_sub")],
+                eclass: cid("c_top"),
+                cost: Cost::new(1.0).unwrap(),
+                subsumed: false,
+            },
+        );
+        egraph.root_eclasses = vec![cid("c_top"), cid("c_root")];
+        egraph.class_data.insert(
+            cid("c_meta"),
+            ClassData {
+                typ: None,
+                extra: [("note".to_string(), "keep".to_string())]
+                    .into_iter()
+                    .collect(),
+            },
+        );
+
+        egraph.saturate_inline_leaves();
+        assert!(!egraph.nodes.contains_key(&nid("n_plain")));
+        assert!(!egraph.nodes.contains_key(&nid("n_mid")));
+        assert!(egraph.nodes.contains_key(&nid("n_root")));
+        assert!(egraph.nodes.contains_key(&nid("n_meta")));
+        assert!(egraph.nodes.contains_key(&nid("n_sub")));
+        assert_eq!(egraph.nodes[&nid("n_top")].op, "pair(wrap(x), ·, ·, ·)");
     }
 }
